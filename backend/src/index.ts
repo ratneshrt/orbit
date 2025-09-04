@@ -59,11 +59,12 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", ({ roomId, name }) => {
     console.log(`${name} is trying to join the room ${roomId}`)
 
-    if(!roomId){
+    if(!rooms[roomId]){
       socket.emit("joinError", { message: "Room does not exists" })
+      return
     }
 
-    rooms[roomId].users[name] = { name }
+    rooms[roomId].users[socket.id] = { name }
     socket.join(roomId)
     socket.emit("roomData", { videoId: rooms[roomId].videoId, currentTime: rooms[roomId].currentTime, isPlaying: rooms[roomId].isPlaying })
 
@@ -129,7 +130,7 @@ io.on("connection", (socket) => {
       return
     }
 
-    io.to(roomId).emit("chatMessage", { name: user.name, message, timeStamp: Date.now() })
+    io.to(roomId).emit("chatMessage", { name: user.name, message, timestamp: Date.now() })
   })
 
   socket.on("disconnect", () => {
